@@ -4,10 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -23,7 +22,8 @@ public class ComputeController {
     }
 
     @RequestMapping(value = "/test" ,method = RequestMethod.GET)
-    public String test() {
-        return "this is test" + System.currentTimeMillis()/1000;
+    public ResponseEntity test() {
+        System.out.println("11");
+        return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
