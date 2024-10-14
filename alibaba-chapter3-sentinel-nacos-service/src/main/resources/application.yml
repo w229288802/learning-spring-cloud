@@ -1,0 +1,93 @@
+server:
+  port: 8402
+
+spring:
+  application:
+    name: alibaba-chapter3-sentinel-nacos-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+    sentinel:
+      transport:
+        # 配置Sentinel dashboard地址
+        dashboard: localhost:8080
+        # 默认8719端口，键入被占用会自动从8719+1，直到找到未被占用的端口
+        port: 8719
+      datasource:
+        # 自定义命名
+        flow-rule:
+          # 支持多种持久化数据源：file、nacos、zk、apollo、redis、consul
+          nacos:
+            # nacos服务地址
+            serverAddr: ${spring.cloud.nacos.discovery.server-addr}
+            # 命名空间，根据环境配置
+            namespace: public
+            # 这里我做了一下细分，不同规则设置不同groupId
+            groupId: SENTINEL_GROUP
+            # 仅支持JSON和XML类型
+            dataId: ${spring.application.name}-flow-rules
+            # 规则类型：flow、degrade、param-flow、system、authority
+            ruleType: flow
+        # 自定义命名
+        system-rule:
+          # 支持多种持久化数据源：file、nacos、zk、apollo、redis、consul
+          nacos:
+            # nacos服务地址
+            serverAddr: ${spring.cloud.nacos.discovery.server-addr}
+            # 命名空间，根据环境配置
+            namespace: public
+            # 这里我做了一下细分，不同规则设置不同groupId
+            groupId: SENTINEL_GROUP
+            # 仅支持JSON和XML类型
+            dataId: ${spring.application.name}-system-rules
+            # 规则类型：flow、degrade、param-flow、system、authority
+            ruleType: system
+        # 自定义命名
+        degrade-rule:
+          # 支持多种持久化数据源：file、nacos、zk、apollo、redis、consul
+          nacos:
+            # nacos服务地址
+            serverAddr: ${spring.cloud.nacos.discovery.server-addr}
+            # 命名空间，根据环境配置
+            namespace: public
+            # 这里我做了一下细分，不同规则设置不同groupId
+            groupId: SENTINEL_GROUP
+            # 仅支持JSON和XML类型
+            dataId: ${spring.application.name}-degrade-rules
+            # 规则类型：flow、degrade、param-flow、system、authority
+            ruleType: degrade
+        # 自定义命名
+        param-flow-rule:
+          # 支持多种持久化数据源：file、nacos、zk、apollo、redis、consul
+          nacos:
+            # nacos服务地址
+            serverAddr: ${spring.cloud.nacos.discovery.server-addr}
+            # 命名空间，根据环境配置
+            namespace: public
+            # 这里我做了一下细分，不同规则设置不同groupId
+            groupId: SENTINEL_GROUP
+            # 仅支持JSON和XML类型
+            dataId: ${spring.application.name}-param-flow-rules
+            # 规则类型：flow、degrade、param-flow、system、authority
+            ruleType: param-flow
+        # 自定义命名
+        authority-rule:
+          # 支持多种持久化数据源：file、nacos、zk、apollo、redis、consul
+          nacos:
+            # nacos服务地址
+            serverAddr: ${spring.cloud.nacos.discovery.server-addr}
+            # 命名空间，根据环境配置
+            namespace: public
+            # 这里我做了一下细分，不同规则设置不同groupId
+            groupId: SENTINEL_GROUP
+            # 仅支持JSON和XML类型
+            dataId: ${spring.application.name}-authority-rules
+            # 规则类型：flow、degrade、param-flow、system、authority,GW_API_GROUP,GW_FLOW
+            ruleType: authority
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
