@@ -1,0 +1,17 @@
+version: '3.1'
+services:
+  seata-server:
+    container_name: my-seata-server
+    build:
+      context: .
+    image: my-seata-server
+    hostname: seata-server
+    ports:
+      - "8091:8091"
+    environment:
+      - SEATA_PORT=8091
+      - SEATA_IP=192.168.137.1 #注意！！！！写localhost不生效
+    volumes:
+      - "/usr/share/zoneinfo/Asia/Shanghai:/etc/localtime"        #设置系统时区
+      - "/usr/share/zoneinfo/Asia/Shanghai:/etc/timezone"         #设置时区
+    restart: always

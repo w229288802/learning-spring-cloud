@@ -1,0 +1,139 @@
+{
+  "Name": "order",
+  "Comment": "创建订单，扣减账户，扣减库存",
+  "StartState": "SaveOrder",
+  "Version": "0.0.1",
+  "States": {
+    "SaveOrder": {
+      "Type": "ServiceTask",
+      "ServiceName": "orderService",
+      "ServiceMethod": "saveOrder",
+      "CompensateState": "CompensateDeleteOrder",
+      "Next": "ChoiceAccountState",
+      "Input": [
+        "$.[businessKey]",
+        "$.[order]"
+      ],
+      "Output": {
+        "saveOrderResult": "$.#root"
+      },
+      "Status": {
+        "#root == true": "SU",
+        "#root == false": "FA",
+        "$Exception{java.lang.Throwable}": "UN"
+      }
+    },
+    "ChoiceAccountState": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Expression": "[saveOrderResult] == true",
+          "Next": "ReduceAccount"
+        }
+      ],
+      "Default": "Fail"
+    },
+    "ReduceAccount": {
+      "Type": "ServiceTask",
+      "ServiceName": "accountService",
+      "ServiceMethod": "deduct",
+      "CompensateState": "CompensateDeleteOrder",
+      "Input": [
+        "$.[userId]",
+        "$.[money]",
+        {
+          "throwException": "$.[reduceAccountFail]"
+        }
+      ],
+      "Output": {
+        "reduceAccountResult": "$.#root"
+      },
+      "Status": {
+        "#root == true": "SU",
+        "#root == false": "FA",
+        "$Exception{java.lang.Throwable}": "UN"
+      },
+      "Catch": [
+        {
+          "Exceptions": [
+            "java.lang.Throwable"
+          ],
+          "Next": "CompensationTrigger"
+        }
+      ],
+      "Next": "ChoiceStorageState"
+    },
+    "ChoiceStorageState": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Expression": "[reduceAccountResult] == true",
+          "Next": "ReduceStorage"
+        }
+      ],
+      "Default": "Fail"
+    },
+    "ReduceStorage": {
+      "Type": "ServiceTask",
+      "ServiceName": "storageService",
+      "ServiceMethod": "deduct",
+      "CompensateState": "CompensateReduceAccount",
+      "Input": [
+        "$.[commodityCode]",
+        "$.[count]",
+        {
+          "throwException": "$.[reduceStorageFail]"
+        }
+      ],
+      "Output": {
+        "reduceStorageResult": "$.#root"
+      },
+      "Status": {
+        "#root == true": "SU",
+        "#root == false": "FA",
+        "$Exception{java.lang.Throwable}": "UN"
+      },
+      "Catch": [
+        {
+          "Exceptions": [
+            "java.lang.Throwable"
+          ],
+          "Next": "CompensationTrigger"
+        }
+      ],
+      "Next": "Succeed"
+    },
+
+    "CompensateDeleteOrder": {
+      "Type": "ServiceTask",
+      "ServiceName": "orderService",
+      "ServiceMethod": "deleteOrder",
+      "Input": [
+        "$.[businessKey]",
+        "$.[order]"
+      ]
+    },
+    "CompensateReduceAccount": {
+      "Type": "ServiceTask",
+      "ServiceName": "accountService",
+      "ServiceMethod": "rollback",
+      "Input": [
+        "$.[userId]",
+        "$.[money]"
+      ]
+    },
+
+    "CompensationTrigger": {
+      "Type": "CompensationTrigger",
+      "Next": "Fail"
+    },
+    "Succeed": {
+      "Type": "Succeed"
+    },
+    "Fail": {
+      "Type": "Fail",
+      "ErrorCode": "PURCHASE_FAILED",
+      "Message": "purchase failed"
+    }
+  }
+}
